@@ -1,0 +1,28 @@
+###########################################
+# Syntax Coloring Map For MyLibrary
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+Alex80micro	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+clock	KEYWORD2
+reset	KEYWORD2
+begin_UNO	KEYWORD2
+begin_RAM	KEYWORD2
+begin_MCP	KEYWORD2
+read_ADDR	KEYWORD2
+read_CMD	KEYWORD2
+read_DATA	KEYWORD2
+write_DATA	KEYWORD2
+read_RAM	KEYWORD2
+write_RAM	KEYWORD2
+pinMode_DATA	KEYWORD2
+
+###########################################
+# Constants (LITERAL1)
+###########################################
