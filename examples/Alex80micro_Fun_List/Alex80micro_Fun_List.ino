@@ -1,4 +1,4 @@
-#include "ALEX80micro.h"
+#include <Alex80u.h>
 
 // UNO R3
 #define MCP_SPEED 8000000

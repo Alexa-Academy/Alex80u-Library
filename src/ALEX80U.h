@@ -3,18 +3,23 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include "fast_mcp23s17.h"
+#include "fast_spi_bus.h"
+#include "fast_sram.h"
 
 class Alex80u {
 
 private:
   unsigned long rs;  // Ram Spi Speed
   unsigned long ms;  // Mcp Spi Speed
+  FastSpiBus spiBus;
+  FastMcp23s17 mcp1;
+  FastMcp23s17 mcp2;
+  FastSram sram;
 
   void mcp1_pinMode(int pin, byte mode);
   void mcp2_pinMode(int pin, byte mode);
   void mcp2_digitalWrite(int pin, byte value);
-  void mcpWrite(uint8_t cs, uint8_t reg, uint8_t data);
-  uint8_t mcpRead(uint8_t cs, uint8_t reg);
 
 
 public:
