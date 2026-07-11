@@ -31,24 +31,21 @@ inline void writeR4Port(
 // PRIVATE -----------------------------------------
 
 void ALEX80u::mcp1_pinMode(int pin, byte mode) {
-  this->mcp1.pinMode(pin, mode);
+  mcp1.pinMode(pin, mode);
 }
 
 void ALEX80u::mcp2_pinMode(int pin, byte mode) {
-  this->mcp2.pinMode(pin, mode);
+  mcp2.pinMode(pin, mode);
 }
 
 void ALEX80u::mcp2_digitalWrite(int pin, byte value) {
-  this->mcp2.digitalWrite(pin, value);
+  mcp2.digitalWrite(pin, value);
 }
 
 
 // PUBLIC -----------------------------------------
 
-ALEX80u::ALEX80u(unsigned long ram_speed, unsigned long mcp_speed) {
-  this->rs = ram_speed;
-  this->ms = mcp_speed;
-}
+ALEX80u::ALEX80u(unsigned long ram_speed, unsigned long mcp_speed) : rs(ram_speed), ms(mcp_speed) {}
 
 void ALEX80u::begin_UNO() {
   // Imposto il DataBus in Input
@@ -73,54 +70,47 @@ void ALEX80u::begin_UNO() {
 }
 
 void ALEX80u::begin_RAM() {
-  this->spiBus.begin(SPI);
-  delay(1);
-  this->sram.begin(8, this->spiBus, this->rs);
+  spiBus.begin(SPI);
+  sram.begin(8, spiBus, rs);
 }
 
 void ALEX80u::begin_MCP() {
-  this->spiBus.begin(SPI);
-  delay(1);
-  this->mcp1.begin(10, this->spiBus, this->ms);
-  this->mcp2.begin(9, this->spiBus, this->ms);
-  delay(1);
+  spiBus.begin(SPI);
+
+  mcp1.begin(10, spiBus, ms);
+  mcp2.begin(9, spiBus, ms);
+
+  mcp2_digitalWrite(0, HIGH);   // RST
+  mcp2_digitalWrite(10, HIGH);  // BUSRQ
+
   // Inizializzo i pin di MCP1
-  this->mcp1_pinMode(0, INPUT);  // A0
-  this->mcp1_pinMode(1, INPUT);  // A1
-  this->mcp1_pinMode(2, INPUT);  // A2
-  this->mcp1_pinMode(3, INPUT);  // A3
-  this->mcp1_pinMode(4, INPUT);  // A4
-  this->mcp1_pinMode(5, INPUT);  // A5
-  this->mcp1_pinMode(6, INPUT);  // A6
-  this->mcp1_pinMode(7, OUTPUT);
-  this->mcp1_pinMode(8, INPUT);   // A7
-  this->mcp1_pinMode(9, INPUT);   // A8
-  this->mcp1_pinMode(10, INPUT);  // A9
-  this->mcp1_pinMode(11, INPUT);  // A10
-  this->mcp1_pinMode(12, INPUT);  // A11
-  this->mcp1_pinMode(13, INPUT);  // A12
-  this->mcp1_pinMode(14, INPUT);  // A13
-  this->mcp1_pinMode(15, OUTPUT);
+  mcp1_pinMode(0, INPUT);  // A0
+  mcp1_pinMode(1, INPUT);  // A1
+  mcp1_pinMode(2, INPUT);  // A2
+  mcp1_pinMode(3, INPUT);  // A3
+  mcp1_pinMode(4, INPUT);  // A4
+  mcp1_pinMode(5, INPUT);  // A5
+  mcp1_pinMode(6, INPUT);  // A6
+  mcp1_pinMode(8, INPUT);   // A7
+  mcp1_pinMode(9, INPUT);   // A8
+  mcp1_pinMode(10, INPUT);  // A9
+  mcp1_pinMode(11, INPUT);  // A10
+  mcp1_pinMode(12, INPUT);  // A11
+  mcp1_pinMode(13, INPUT);  // A12
+  mcp1_pinMode(14, INPUT);  // A13
   // Inizializzo i pin di MCP2
-  this->mcp2_pinMode(0, OUTPUT);  // RST
-  this->mcp2_pinMode(1, INPUT);   // HALT
-  this->mcp2_pinMode(2, INPUT);   // RFSH
-  this->mcp2_pinMode(3, INPUT);   // M1
-  this->mcp2_pinMode(4, INPUT);   // IORQ
-  this->mcp2_pinMode(5, INPUT);   // MREQ
-  this->mcp2_pinMode(6, INPUT);   // WR
-  this->mcp2_pinMode(7, OUTPUT);
-  this->mcp2_pinMode(8, INPUT);    // A14
-  this->mcp2_pinMode(9, INPUT);    // A15
-  this->mcp2_pinMode(10, OUTPUT);  // BUSRQ
-  this->mcp2_pinMode(11, INPUT);   // BUSACK
-  this->mcp2_pinMode(12, INPUT);   // RD
-  this->mcp2_pinMode(13, OUTPUT);
-  this->mcp2_pinMode(14, OUTPUT);
-  this->mcp2_pinMode(15, OUTPUT);
-  // Imposto alte le uscite
-  this->mcp2_digitalWrite(0, HIGH);   // RST
-  this->mcp2_digitalWrite(10, HIGH);  // BUSRQ
+  mcp2_pinMode(0, OUTPUT);  // RST
+  mcp2_pinMode(1, INPUT);   // HALT
+  mcp2_pinMode(2, INPUT);   // RFSH
+  mcp2_pinMode(3, INPUT);   // M1
+  mcp2_pinMode(4, INPUT);   // IORQ
+  mcp2_pinMode(5, INPUT);   // MREQ
+  mcp2_pinMode(6, INPUT);   // WR
+  mcp2_pinMode(8, INPUT);    // A14
+  mcp2_pinMode(9, INPUT);    // A15
+  mcp2_pinMode(10, OUTPUT);  // BUSRQ
+  mcp2_pinMode(11, INPUT);   // BUSACK
+  mcp2_pinMode(12, INPUT);   // RD
 }
 
 void ALEX80u::set_CLK(byte mode) {
@@ -202,32 +192,23 @@ void ALEX80u::set_WAIT(byte mode) {
 }
 
 void ALEX80u::set_RST(byte mode) {
-  this->mcp2_digitalWrite(0, mode);
+  mcp2_digitalWrite(0, mode);
 }
 
 void ALEX80u::set_BUSRQ(byte mode) {
-  this->mcp2_digitalWrite(10, mode);
+  mcp2_digitalWrite(10, mode);
 }
 
 uint16_t ALEX80u::read_ADDR() {
   uint16_t mcp1Value;
   uint16_t mcp2Value;
-  FastMcp23s17::readGPIO16Pair(
-      this->mcp1,
-      this->mcp2,
-      mcp1Value,
-      mcp2Value);
-  return
-      (mcp1Value & 0x007fU) |
-      ((mcp1Value >> 1) & 0x3f80U) |
-      ((mcp2Value << 6) & 0xc000U);
+  FastMcp23s17::readGPIO16Pair(mcp1, mcp2, mcp1Value, mcp2Value);
+  return (mcp1Value & 0x007fU) | ((mcp1Value >> 1) & 0x3f80U) | ((mcp2Value << 6) & 0xc000U);
 }
 
 uint8_t ALEX80u::read_CMD() {
-  const uint16_t value = this->mcp2.readGPIO16();
-  return
-      static_cast<uint8_t>((value >> 1) & 0x3fU) |
-      static_cast<uint8_t>((value >> 5) & 0xc0U);
+  const uint16_t value = mcp2.readGPIO16();
+  return static_cast<uint8_t>((value >> 1) & 0x3fU) | static_cast<uint8_t>((value >> 5) & 0xc0U);
 }
 
 void ALEX80u::pinMode_DATA(byte mode) {
@@ -353,9 +334,9 @@ void ALEX80u::write_DATA(uint8_t val) {
 }
 
 uint8_t ALEX80u::read_RAM(uint16_t ind) {
-  return this->sram.read8(ind);
+  return sram.read8(ind);
 }
 
 void ALEX80u::write_RAM(uint16_t ind, uint8_t val) {
-  this->sram.write8(ind, val);
+  sram.write8(ind, val);
 }
