@@ -94,7 +94,11 @@ void FastSpiBus::select(uint8_t chipSelectPin) {
     return;
   }
   if (chipSelectPin == 10) {
+#if defined(ARDUINO_MINIMA)
+    R_PORT1->PORR = 1U << 12;
+#else
     R_PORT1->PORR = 1U << 3;
+#endif
     return;
   }
 #endif
@@ -117,7 +121,11 @@ void FastSpiBus::deselect(uint8_t chipSelectPin) {
     return;
   }
   if (chipSelectPin == 10) {
+#if defined(ARDUINO_MINIMA)
+    R_PORT1->POSR = 1U << 12;
+#else
     R_PORT1->POSR = 1U << 3;
+#endif
     return;
   }
 #endif
