@@ -6,7 +6,6 @@
 
 #ifdef ARDUINO_AVR_UNO  // Uno R3
 #define SER_SPEED 9600
-#define SERIAL_BUFFER_SIZE 128
 #define MCP_SPEED 8000000
 #define RAM_SPEED 8000000
 #define BOARD_MSG "ARDUINO UNO R3"
@@ -14,7 +13,6 @@
 
 #ifdef ARDUINO_UNOR4_WIFI  // Uno R4 WIFI
 #define SER_SPEED 115200
-#define SERIAL_BUFFER_SIZE 1024
 #define MCP_SPEED 10000000
 #define RAM_SPEED 20000000
 #define BOARD_MSG "ARDUINO UNO R4 WIFI"
@@ -22,7 +20,6 @@
 
 #ifdef ARDUINO_MINIMA  // Uno R4 MINIMA
 #define SER_SPEED 115200
-#define SERIAL_BUFFER_SIZE 1024
 #define MCP_SPEED 10000000
 #define RAM_SPEED 20000000
 #define BOARD_MSG "ARDUINO UNO R4 MINIMA"
@@ -71,8 +68,8 @@ bool z_wr_prev = HIGH;
 void setup() {
     delay(1);
     Serial.begin(SER_SPEED); 
-    while (!Serial);
-    delay(1);
+    const unsigned long serialTimeout = millis() + 1000;
+    while (!Serial && millis() < serialTimeout) {}  // Timeout needed for R4 if a serial terminal is not connected
 
     a80u.begin_UNO();
     a80u.begin_RAM();
@@ -85,7 +82,7 @@ void setup() {
 
     // Reset the Z80
     a80u.set_RST(LOW); 
-    for (uint8_t rst_cnt = 0; rst_cnt < 16; rst_cnt++) { 
+    for (uint8_t rst_cnt = 0; rst_cnt < 16; ++rst_cnt) { 
         a80u.set_CLK(HIGH);
         delay(1);
         a80u.set_CLK(LOW);
@@ -95,7 +92,10 @@ void setup() {
 }
 
 void loop() {
-    const uint8_t cmd = a80u.read_CMD();
+    uint16_t z_addr;
+    uint8_t cmd;
+    a80u.read_BUS(z_addr, cmd);
+
     const bool z_iorq = bitRead(cmd, 3);
     const bool z_mreq = bitRead(cmd, 4);
     const bool z_wr = bitRead(cmd, 5);
@@ -126,7 +126,6 @@ void loop() {
     a80u.set_CLK(LOW);
 
     if (read_memory) {                                                           
-        const uint16_t z_addr = a80u.read_ADDR();
         const uint8_t z_data = (z_addr < START_RAM)
             ? pgm_read_byte_near(intROM + z_addr)
             : a80u.read_RAM(z_addr);
@@ -134,9 +133,7 @@ void loop() {
         a80u.pinMode_DATA(OUTPUT);
         data_dir = false;
         a80u.write_DATA(z_data);  // Sends to the Z80 the data read from ROM or RAM
-    } else if (write_memory) { 
-        const uint16_t z_addr = a80u.read_ADDR(); 
-        
+    } else if (write_memory) {      
         // Write Z80 data to Arduino RAM when the address is in the RAM area
         if (z_addr >= START_RAM) { 
             const uint8_t z_data = a80u.read_DATA();
