@@ -86,3 +86,34 @@ basic/
 # Auxiliary documentation
 # =========================
 docu/
+
+# Bytecode Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Test e coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Tool di analisi
+.mypy_cache/
+.ruff_cache/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# macOS
+.DS_Store
