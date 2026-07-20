@@ -80,7 +80,8 @@ test_build/
 # Basic source
 # =========================
 basic/
-generated/basic_rom.h
+examples/ALEX80u_MS_BASIC/generated/*
+!examples/ALEX80u_MS_BASIC/generated/.gitkeep
 
 
 # =========================
