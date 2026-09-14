@@ -89,6 +89,6 @@ https://www.youtube.com/@alexaacademyit
 
 ---
 
-Originally developed by Flavio Carchedi (Tecnow).
+Originally developed by Flavio Carchedi.
 
 Modified, expanded, and maintained by Paolo Godino (Alexa Academy).
